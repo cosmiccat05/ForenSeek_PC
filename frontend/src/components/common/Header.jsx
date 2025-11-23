@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, LogOut, Home } from 'lucide-react';
 import { useAuth } from '../ui/AuthProvider';
-import '../../styles/components/Header.css';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -37,7 +36,7 @@ const Header = () => {
       <div className="header-content">
         {/* Logo */}
         <div className="header-logo" onClick={goToHome}>
-          <img src="/images/logo.jpg" alt="Forenseek" className="header-logo-img" />
+          <img src="/images/logo.png" alt="Forenseek" className="header-logo-img" />
           <span className="header-logo-text">FORENSEEK</span>
         </div>
 

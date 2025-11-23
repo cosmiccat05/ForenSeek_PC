@@ -1,9 +1,7 @@
-import '../../styles/components/Footer.css';
-
 const Footer = () => {
   return (
     <footer className="footer">
-      <p>Forenseek © 2025 - Sistema de análisis forense con ADN</p>
+      <p>Forenseek © 2025 – Sistema de análisis forense con ADN</p>
     </footer>
   );
 };

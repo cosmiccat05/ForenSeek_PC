@@ -1,78 +1,25 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/ui/AuthProvider';
-import { User, LogOut, Search, History } from 'lucide-react';
+import { Search, History } from 'lucide-react';
+import Header from '../components/common/Header';
+import Footer from '../components/common/Footer';
 import '../styles/pages/home.css';
 
 const Home = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
-  const [showUserMenu, setShowUserMenu] = useState(false);
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/auth');
-  };
+  const { user } = useAuth();
 
   const handleNewSearch = () => {
-    console.log('Iniciar nueva búsqueda');
+    navigate('/search/new');
   };
 
   const handleViewHistory = () => {
-    console.log('Ver historial');
-  };
-
-  // Obtener iniciales del nombre
-  const getUserInitials = () => {
-    if (!user?.name) return 'U. A.';
-    
-    const nameParts = user.name.trim().split(' ');
-    if (nameParts.length === 1) return nameParts[0];
-    
-    const firstName = nameParts[0];
-    const lastNameInitial = nameParts[nameParts.length - 1].charAt(0);
-    
-    return `${firstName} ${lastNameInitial}.`;
+    navigate('/search/history');
   };
 
   return (
     <div className="dashboard">
-      {/* Header */}
-      <header className="dashboard-header">
-        <div className="dashboard-header-content">
-          {/* Logo */}
-          <div className="dashboard-logo">
-            <img src="/images/logo.png" alt="Forenseek" className="logo-img" />
-            <span className="logo-text">FORENSEEK</span>
-          </div>
-
-          {/* Usuario */}
-          <div className="dashboard-user">
-            <div className="user-menu-container">
-              <button 
-                className="user-block"
-                onClick={() => setShowUserMenu(!showUserMenu)}
-              >
-                <span className="user-block-name">{getUserInitials()}</span>
-                <User size={20} />
-              </button>
-
-              {/* Dropdown menu */}
-              {showUserMenu && (
-                <div className="user-dropdown">
-                  <button 
-                    className="dropdown-item"
-                    onClick={handleLogout}
-                  >
-                    <LogOut size={18} />
-                    <span>Cerrar sesión</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="dashboard-hero">
@@ -126,10 +73,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="dashboard-footer">
-        <p>Forenseek © 2025 - Sistema de análisis forense con ADN</p>
-      </footer>
+      <Footer />
     </div>
   );
 };
