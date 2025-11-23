@@ -1,22 +1,25 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Upload, FileText, X } from 'lucide-react';
-import Header from '../components/common/Header';
-import Footer from '../components/common/Footer';
-import Button from '../components/common/Button';
-import '../styles/pages/search.css';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Upload, FileText, X } from "lucide-react";
+import Header from "../components/common/Header";
+import Footer from "../components/common/Footer";
+import Button from "../components/common/Button";
+import "../styles/pages/search.css";
+import api from "../services/api";
 
 const NewSearch = () => {
   const navigate = useNavigate();
-  
+
   //estados
-  const [step, setStep] = useState('upload');
+  const [step, setStep] = useState("upload");
   const [file, setFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [pattern, setPattern] = useState('');
+  const [pattern, setPattern] = useState("");
   const [results, setResults] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [job, setJob] = useState(null);
+  const [uploadError, setUploadError] = useState(null);
 
   //handlers de drag & drop
   const handleDragEnter = (e) => {
@@ -42,7 +45,7 @@ const NewSearch = () => {
     setIsDragging(false);
 
     const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile && droppedFile.name.endsWith('.csv')) {
+    if (droppedFile && droppedFile.name.endsWith(".csv")) {
       handleFileSelect(droppedFile);
     }
   };
@@ -54,71 +57,92 @@ const NewSearch = () => {
     }
   };
 
-  const handleFileSelect = (selectedFile) => {
+  const handleFileSelect = async (selectedFile) => {
     setFile(selectedFile);
-    setStep('loading');
-    
-    //simulación de carga
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 10;
-      setUploadProgress(progress);
-      
-      if (progress >= 100) {
-        clearInterval(interval);
-        setTimeout(() => {
-          setStep('loaded');
-        }, 500);
-      }
-    }, 200);
+    setUploadError(null);
+    setJob(null);
+    setUploadProgress(0);
+    setStep("loading");
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    try {
+      const response = await api.post("/jobs", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: (event) => {
+          if (!event.total) return;
+          const progress = Math.round((event.loaded / event.total) * 100);
+          setUploadProgress(progress);
+        },
+      });
+
+      setJob(response.data);
+      setStep("loaded");
+    } catch (error) {
+      console.error("Error subiendo archivo:", error);
+      setUploadError(error.message || "Error al subir el archivo");
+      setFile(null);
+      setUploadProgress(0);
+      setStep("upload");
+      alert(error.message || "Error al subir el archivo");
+    }
   };
 
   const handleCancel = () => {
     setFile(null);
     setUploadProgress(0);
-    setStep('upload');
-    setPattern('');
+    setStep("upload");
+    setPattern("");
     setResults(null);
+    setJob(null);
+    setUploadError(null);
   };
 
   const handleNext = () => {
-    setStep('pattern');
+    setStep("pattern");
     setResults(null); //limpiar resultados previos
   };
 
   const handleSearch = () => {
     setIsSearching(true);
-    
-    //simulado de busqueda
+
     setTimeout(() => {
-      //simulado de resultado exitoso o fallido
-      const isSuccess = pattern.length > 10; // Ejemplo simple
-      
+      const isSuccess = pattern.length > 10;
+
       setResults({
         success: isSuccess,
         matches: isSuccess ? 5 : 0,
-        suspects: isSuccess 
-          ? ['Sospechoso 01', 'Sospechoso 02', 'Sospechoso 03', 'Sospechoso 04', 'Sospechoso 05']
-          : []
+        suspects: isSuccess
+          ? [
+              "Sospechoso 01",
+              "Sospechoso 02",
+              "Sospechoso 03",
+              "Sospechoso 04",
+              "Sospechoso 05",
+            ]
+          : [],
       });
-      
+
       setIsSearching(false);
-      setStep('results');
+      setStep("results");
     }, 1500);
   };
 
   const handleNewPattern = () => {
-    setPattern('');
+    setPattern("");
     setResults(null);
-    setStep('pattern');
+    setStep("pattern");
   };
 
   const handleViewHistory = () => {
-    navigate('/search/history');
+    navigate("/search/history");
   };
 
   const goBack = () => {
-    navigate('/dashboard');
+    navigate("/dashboard");
   };
 
   return (
@@ -136,12 +160,14 @@ const NewSearch = () => {
         <h1 className="search-title">Nueva búsqueda de ADN</h1>
 
         {/* ESTADO 1: Subir archivo */}
-        {step === 'upload' && (
+        {step === "upload" && (
           <>
-            <p className="search-subtitle">Cargue su archivo CSV y busque su cadena</p>
-            
-            <div 
-              className={`upload-zone ${isDragging ? 'dragging' : ''}`}
+            <p className="search-subtitle">
+              Cargue su archivo CSV y busque su cadena
+            </p>
+
+            <div
+              className={`upload-zone ${isDragging ? "dragging" : ""}`}
               onDragEnter={handleDragEnter}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -151,7 +177,7 @@ const NewSearch = () => {
               <p className="upload-text">
                 Arrastre el archivo CSV o cárguelo desde su computadora
               </p>
-              
+
               <input
                 type="file"
                 accept=".csv"
@@ -163,28 +189,30 @@ const NewSearch = () => {
                 <Upload size={18} />
                 <span>Subir</span>
               </label>
+
+              {uploadError && <p className="upload-error">{uploadError}</p>}
             </div>
           </>
         )}
 
         {/* ESTADO 2: Cargando archivo */}
-        {step === 'loading' && (
+        {step === "loading" && (
           <>
             <p className="search-subtitle">Cargando... Espere un momento.</p>
-            
+
             <div className="loading-card">
               <div className="file-info">
                 <FileText size={24} />
                 <span>{file?.name}</span>
               </div>
-              
+
               <div className="progress-bar">
-                <div 
-                  className="progress-fill" 
+                <div
+                  className="progress-fill"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
-              
+
               <div className="loading-actions">
                 <Button variant="secondary" onClick={handleCancel}>
                   Cancelar
@@ -198,10 +226,10 @@ const NewSearch = () => {
         )}
 
         {/* ESTADO 3: Archivo cargado */}
-        {step === 'loaded' && (
+        {step === "loaded" && (
           <>
             <p className="search-subtitle">Archivo cargado con éxito.</p>
-            
+
             <div className="loaded-card">
               <div className="file-display">
                 <FileText size={24} />
@@ -210,7 +238,11 @@ const NewSearch = () => {
                   <X size={20} />
                 </button>
               </div>
-              
+
+              {job?.responseSummary && (
+                <p className="upload-summary">{job.responseSummary}</p>
+              )}
+
               <div className="loaded-actions">
                 <Button variant="secondary" onClick={handleCancel}>
                   Cancelar
@@ -224,10 +256,12 @@ const NewSearch = () => {
         )}
 
         {/* ESTADO 4: Ingresar patrón */}
-        {step === 'pattern' && (
+        {step === "pattern" && (
           <>
-            <p className="search-subtitle">Busque un patrón ADN en el archivo cargado</p>
-            
+            <p className="search-subtitle">
+              Busque un patrón ADN en el archivo cargado
+            </p>
+
             <div className="pattern-section">
               <label className="pattern-label">
                 Inserte el patrón de ADN a buscar
@@ -239,23 +273,25 @@ const NewSearch = () => {
                 value={pattern}
                 onChange={(e) => setPattern(e.target.value.toUpperCase())}
               />
-              
-              <Button 
-                variant="primary" 
+
+              <Button
+                variant="primary"
                 onClick={handleSearch}
                 disabled={!pattern || isSearching}
               >
-                {isSearching ? 'Buscando...' : 'Buscar'}
+                {isSearching ? "Buscando..." : "Buscar"}
               </Button>
             </div>
           </>
         )}
 
         {/* ESTADO 5: Resultados */}
-        {step === 'results' && results && (
+        {step === "results" && results && (
           <>
-            <p className="search-subtitle">Busque un patrón ADN en el archivo cargado</p>
-            
+            <p className="search-subtitle">
+              Busque un patrón ADN en el archivo cargado
+            </p>
+
             <div className="pattern-section-with-results">
               <label className="pattern-label">
                 Inserte el patrón de ADN a buscar
@@ -267,31 +303,35 @@ const NewSearch = () => {
                 value={pattern}
                 onChange={(e) => setPattern(e.target.value.toUpperCase())}
               />
-              
-              <Button 
-                variant="primary" 
+
+              <Button
+                variant="primary"
                 onClick={handleSearch}
                 disabled={!pattern || isSearching}
               >
-                {isSearching ? 'Buscando...' : 'Buscar'}
+                {isSearching ? "Buscando..." : "Buscar"}
               </Button>
             </div>
 
             {/* Card de resultados */}
             <div className="results-card">
               <h3 className="results-title">Resultado de búsqueda</h3>
-              
-              <span className={`results-badge ${results.success ? 'success' : 'failure'}`}>
-                {results.success ? 'EXITOSO' : 'FRACASO'}
+
+              <span
+                className={`results-badge ${
+                  results.success ? "success" : "failure"
+                }`}
+              >
+                {results.success ? "EXITOSO" : "FRACASO"}
               </span>
-              
+
               <div className="results-info">
                 <p>
                   <strong>Coincidencias encontradas:</strong> {results.matches}
                 </p>
-                
+
                 <p className="suspects-label">Lista de sospechosos:</p>
-                
+
                 {results.suspects.length > 0 ? (
                   <ul className="suspects-list">
                     {results.suspects.map((suspect, index) => (
@@ -302,7 +342,7 @@ const NewSearch = () => {
                   <p className="no-suspects">No se encontraron sospechosos</p>
                 )}
               </div>
-              
+
               <div className="results-actions">
                 <Button variant="secondary" onClick={handleViewHistory}>
                   Ver el historial

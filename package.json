@@ -1,0 +1,21 @@
+{
+  "name": "forenseek_pc",
+  "version": "1.0.0",
+  "description": "Trabajo Final del curso de Programación Competitiva :p",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm install --prefix backend && npm instal --prefix frontend && npm run build --prefix frontend",
+    "start": "npm run start --prefix backend"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cosmiccat05/ForenSeek_PC.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cosmiccat05/ForenSeek_PC/issues"
+  },
+  "homepage": "https://github.com/cosmiccat05/ForenSeek_PC#readme"
+}

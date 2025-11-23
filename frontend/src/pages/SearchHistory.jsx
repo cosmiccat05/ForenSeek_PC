@@ -1,81 +1,60 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, FileText } from 'lucide-react';
-import Header from '../components/common/Header';
-import Footer from '../components/common/Footer';
-import '../styles/pages/history.css';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Search, FileText } from "lucide-react";
+import Header from "../components/common/Header";
+import Footer from "../components/common/Footer";
+import "../styles/pages/history.css";
+import api from "../services/api";
 
 const SearchHistory = () => {
   const navigate = useNavigate();
 
-  //datos simulados de búsquedas (luego con el back lo quitan)
-  const [searches] = useState([
-    {
-      id: 'ID0001',
-      date: '15/11/2024',
-      fileName: 'base_datos01.csv',
-      pattern: 'AGATCAGATCAGATC',
-      success: true,
-      matches: 5,
-      suspects: ['Sospechoso 01', 'Sospechoso 02', 'Sospechoso 03', 'Sospechoso 04', 'Sospechoso 05']
-    },
-    {
-      id: 'ID0002',
-      date: '14/11/2024',
-      fileName: 'base_datos01.csv',
-      pattern: 'WAZA',
-      success: false,
-      matches: 0,
-      suspects: []
-    },
-    {
-      id: 'ID0003',
-      date: '13/11/2024',
-      fileName: 'base_datos02.csv',
-      pattern: 'GCTAGCTAGCTAGCT',
-      success: true,
-      matches: 3,
-      suspects: ['Sospechoso 01', 'Sospechoso 02', 'Sospechoso 03']
-    },
-    {
-      id: 'ID0004',
-      date: '12/11/2024',
-      fileName: 'base_datos03.csv',
-      pattern: 'TTTTAAAACCCCGGGG',
-      success: false,
-      matches: 0,
-      suspects: []
-    },
-    {
-      id: 'ID0005',
-      date: '11/11/2024',
-      fileName: 'base_datos01.csv',
-      pattern: 'CGATCGATCGATCGA',
-      success: true,
-      matches: 2,
-      suspects: ['Sospechoso 01', 'Sospechoso 02']
-    }
-  ]);
-
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [searches, setSearches] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
   const [selectedSearch, setSelectedSearch] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  //Cargar historial desde el backend
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await api.get("/jobs");
+        setSearches(res.data);
+      } catch (err) {
+        console.error(err);
+        setError(err.message || "Error al cargar historial");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, []);
 
   //filtrar búsquedas
-  const filteredSearches = searches.filter(search => {
-    const matchesSearch = search.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         search.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         search.pattern.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesFilter = filterStatus === 'all' || 
-                         (filterStatus === 'success' && search.success) ||
-                         (filterStatus === 'failure' && !search.success);
-    
+  const filteredSearches = searches.filter((search) => {
+    const id = (search._id || "").toLowerCase();
+    const fileName = (search.originalFilename || "").toLowerCase();
+    const summary = (search.responseSummary || "").toLowerCase();
+    const term = searchTerm.toLowerCase();
+
+    const matchesSearch =
+      id.includes(term) || fileName.includes(term) || summary.includes(term);
+
+    const isSuccess = search.status !== "error";
+
+    const matchesFilter =
+      filterStatus === "all" ||
+      (filterStatus === "success" && isSuccess) ||
+      (filterStatus === "failure" && !isSuccess);
+
     return matchesSearch && matchesFilter;
   });
 
   const goBack = () => {
-    navigate('/dashboard');
+    navigate("/dashboard");
   };
 
   const handleViewSearch = (search) => {
@@ -87,28 +66,50 @@ const SearchHistory = () => {
   };
 
   const ResultModal = ({ search, onClose }) => {
-    const { id, date, fileName, pattern, success, matches, suspects } = search;
+    const {
+      _id,
+      createdAt,
+      originalFilename,
+      responseSummary,
+      responseData,
+      status,
+    } = search;
+
+    const success = status !== "error";
+    const matches = responseData?.matches ?? 0;
+    const suspects = responseData?.suspects ?? [];
+    const pattern = responseData?.pattern || "N/A";
 
     return (
       <div className="modal-overlay" onClick={onClose}>
         <div className="result-modal" onClick={(e) => e.stopPropagation()}>
           <div className="result-modal-header">
-            <h3 className="result-modal-title">Búsqueda {id}</h3>
-            <button className="modal-close" onClick={onClose}>×</button>
+            <h3 className="result-modal-title">Búsqueda {_id}</h3>
+            <button className="modal-close" onClick={onClose}>
+              ×
+            </button>
           </div>
 
-          <span className={`results-badge ${success ? 'success' : 'failure'}`}>
-            {success ? 'EXITOSO' : 'FRACASO'}
+          <span className={`results-badge ${success ? "success" : "failure"}`}>
+            {success ? "EXITOSO" : "FRACASO"}
           </span>
 
           <div className="result-modal-info">
-            <p><strong>Fecha:</strong> {date}</p>
-            <p><strong>Archivo:</strong> {fileName}</p>
-            <p><strong>Patrón buscado:</strong> <code>{pattern}</code></p>
-            <p><strong>Coincidencias encontradas:</strong> {matches}</p>
-            
+            <p>
+              <strong>Fecha:</strong> {new Date(createdAt).toLocaleString()}
+            </p>
+            <p>
+              <strong>Archivo:</strong> {originalFilename}
+            </p>
+            <p>
+              <strong>Patrón buscado:</strong> <code>{pattern}</code>
+            </p>
+            <p>
+              <strong>Coincidencias encontradas:</strong> {matches}
+            </p>
+
             <p className="suspects-label">Lista de sospechosos:</p>
-            
+
             {suspects.length > 0 ? (
               <ul className="suspects-list">
                 {suspects.map((suspect, index) => (
@@ -117,6 +118,12 @@ const SearchHistory = () => {
               </ul>
             ) : (
               <p className="no-suspects">No se encontraron sospechosos</p>
+            )}
+
+            {responseSummary && (
+              <p style={{ marginTop: "1rem" }}>
+                <strong>Resumen:</strong> {responseSummary}
+              </p>
             )}
           </div>
 
@@ -157,20 +164,24 @@ const SearchHistory = () => {
 
           <div className="filter-buttons">
             <button
-              className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
-              onClick={() => setFilterStatus('all')}
+              className={`filter-btn ${filterStatus === "all" ? "active" : ""}`}
+              onClick={() => setFilterStatus("all")}
             >
               Todos
             </button>
             <button
-              className={`filter-btn ${filterStatus === 'success' ? 'active' : ''}`}
-              onClick={() => setFilterStatus('success')}
+              className={`filter-btn ${
+                filterStatus === "success" ? "active" : ""
+              }`}
+              onClick={() => setFilterStatus("success")}
             >
               Exitosos
             </button>
             <button
-              className={`filter-btn ${filterStatus === 'failure' ? 'active' : ''}`}
-              onClick={() => setFilterStatus('failure')}
+              className={`filter-btn ${
+                filterStatus === "failure" ? "active" : ""
+              }`}
+              onClick={() => setFilterStatus("failure")}
             >
               Fracasos
             </button>
@@ -179,34 +190,61 @@ const SearchHistory = () => {
 
         {/* Lista de búsquedas */}
         <div className="history-list">
-          {filteredSearches.length > 0 ? (
-            filteredSearches.map((search) => (
-              <div key={search.id} className="history-item">
-                <div className="history-item-content">
-                  <FileText size={24} className="history-icon" />
-                  <div className="history-item-info">
-                    <span className="history-item-id">{search.id}</span>
-                    <span className="history-item-separator">|</span>
-                    <span className="history-item-file">{search.fileName}</span>
-                    <span className="history-item-separator">|</span>
-                    <span className="history-item-date">{search.date}</span>
-                  </div>
-                  <span className={`history-badge ${search.success ? 'success' : 'failure'}`}>
-                    {search.success ? 'EXITOSO' : 'FRACASO'}
-                  </span>
-                </div>
-                <button
-                  className="history-view-btn"
-                  onClick={() => handleViewSearch(search)}
-                >
-                  Ver
-                </button>
-              </div>
-            ))
-          ) : (
+          {loading && (
             <div className="no-results">
-              <p>No se encontraron búsquedas</p>
+              <p>Cargando historial...</p>
             </div>
+          )}
+
+          {!loading && error && (
+            <div className="no-results">
+              <p>{error}</p>
+            </div>
+          )}
+
+          {!loading && !error && (
+            <>
+              {filteredSearches.length > 0 ? (
+                filteredSearches.map((search) => {
+                  const isSuccess = search.status !== "error";
+                  return (
+                    <div key={search._id} className="history-item">
+                      <div className="history-item-content">
+                        <FileText size={24} className="history-icon" />
+                        <div className="history-item-info">
+                          <span className="history-item-id">{search._id}</span>
+                          <span className="history-item-separator">|</span>
+                          <span className="history-item-file">
+                            {search.originalFilename}
+                          </span>
+                          <span className="history-item-separator">|</span>
+                          <span className="history-item-date">
+                            {new Date(search.createdAt).toLocaleString()}
+                          </span>
+                        </div>
+                        <span
+                          className={`history-badge ${
+                            isSuccess ? "success" : "failure"
+                          }`}
+                        >
+                          {isSuccess ? "EXITOSO" : "FRACASO"}
+                        </span>
+                      </div>
+                      <button
+                        className="history-view-btn"
+                        onClick={() => handleViewSearch(search)}
+                      >
+                        Ver
+                      </button>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="no-results">
+                  <p>No se encontraron búsquedas</p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>
