@@ -1,0 +1,124 @@
+/* src/styles/pages/splash.css */
+
+.splash-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #111827 0%, #0c3b5e 50%, #1f6397 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.splash-content {
+  text-align: center;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Icono del gorrito */
+.splash-icon {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeInDown 0.8s ease-out;
+}
+
+.splash-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Título */
+.splash-title {
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: white;
+  margin: 0;
+  animation: fadeIn 1s ease-out 0.3s both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Subtítulo */
+.splash-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  letter-spacing: 1px;
+  animation: fadeIn 1s ease-out 0.6s both;
+}
+
+/* Loader animado */
+.splash-loader {
+  width: 240px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 16px;
+  animation: fadeIn 1s ease-out 0.9s both;
+}
+
+.loader-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  border-radius: 3px;
+  animation: loading 1.5s ease-in-out infinite;
+}
+
+@keyframes loading {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .splash-icon {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .splash-title {
+    font-size: 36px;
+    letter-spacing: 2px;
+  }
+  
+  .splash-subtitle {
+    font-size: 14px;
+  }
+  
+  .splash-loader {
+    width: 180px;
+  }
+}
