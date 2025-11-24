@@ -106,7 +106,7 @@ const NewSearch = () => {
     setResults(null); //limpiar resultados previos
   };
 
-  const handleSearch = () => {
+  /*const handleSearch = () => {
     setIsSearching(true);
 
     setTimeout(() => {
@@ -129,6 +129,42 @@ const NewSearch = () => {
       setIsSearching(false);
       setStep("results");
     }, 1500);
+  };*/
+  const handleSearch = async () => {
+    if (!pattern || !job) return;
+    setIsSearching(true);
+
+    try {
+      const response = await api.post(
+        "/search/buscar",
+        {
+          archivo: job._id,
+          patron: pattern
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      const { search } = response.data;
+      const coincidencias = search.coincidencias || [];
+
+      setResults({
+        success: coincidencias.length > 0,
+        matches: coincidencias.length,
+        suspects: coincidencias,
+        search,
+      });
+      
+      setStep("results");
+    } catch (error) {
+      console.error("Error en la búsqueda:", error);
+      alert(error.response?.data?.message || "Error al buscar");
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const handleNewPattern = () => {
