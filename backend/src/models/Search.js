@@ -2,8 +2,10 @@ import mongoose from "mongoose";
 
 const searchSchema = new mongoose.Schema(
   {
-    email: {
-      type: String
+    usuario: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     archivo: {
       type: String,

@@ -2,8 +2,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-function generateToken(userId, email) {
-  return jwt.sign({ id: userId, email: email }, process.env.JWT_SECRET, {
+function generateToken(userId) {
+  return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || "7d",
   });
 }
@@ -28,7 +28,7 @@ export async function register(req, res) {
 
     const user = await User.create({ name, email, passwordHash });
 
-    const token = generateToken(user._id, user.email);
+    const token = generateToken(user._id);
 
     res.status(201).json({
       token,

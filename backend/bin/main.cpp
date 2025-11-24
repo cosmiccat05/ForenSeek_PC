@@ -19,7 +19,7 @@ int main() {
     }
 
     //cout << "Patron recibido: " << patron << endl;
-    cout << R"({"coincidencias":["Lucero Cubas","Alejandro Olivos"]})";
+    cout << R"({"coincidencias":[]})";
 
     return 0;
 }

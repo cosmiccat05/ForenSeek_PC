@@ -6,7 +6,7 @@ import path from "node:path";
 
 export async function buscar(req, res) {
   try {
-    const email = req.user.email;
+    const userId = req.user.id;
 
     const { archivo, patron, coincidencias } = req.body;
 
@@ -44,12 +44,12 @@ export async function buscar(req, res) {
       return res.status(500).json({ message: "El .exe devolvió un JSON inválido" });
     }
 
-    const search = await Search.create({ email, archivo: csvPath, patron, coincidencias: sospechosos.coincidencias || [] });
+    const search = await Search.create({ usuario: userId, archivo: csvPath, patron, coincidencias: sospechosos.coincidencias || [] });
 
     res.status(201).json({
       search: {
         id: search._id,
-        email: search.email,
+        usuario: search.usuario,
         archivo: search.archivo,
         patron: search.patron,
         coincidencias: search.coincidencias
@@ -57,6 +57,18 @@ export async function buscar(req, res) {
     });
   } catch (err) {
     console.error("Error in buscar controller:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function getBusquedas(req, res) {
+  try {
+    const userId = req.user.id;
+    const busquedas = await Search.find({ usuario: userId });
+
+    res.status(200).json(busquedas);
+  } catch (error) {
+    console.error("Error in getAllJobs controller:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 }

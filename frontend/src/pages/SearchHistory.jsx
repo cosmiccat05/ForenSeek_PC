@@ -20,7 +20,7 @@ const SearchHistory = () => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const res = await api.get("/jobs");
+        const res = await api.get("/search");
         setSearches(res.data);
       } catch (err) {
         console.error(err);
@@ -36,14 +36,15 @@ const SearchHistory = () => {
   //filtrar búsquedas
   const filteredSearches = searches.filter((search) => {
     const id = (search._id || "").toLowerCase();
-    const fileName = (search.originalFilename || "").toLowerCase();
-    const summary = (search.responseSummary || "").toLowerCase();
+    const fileName = (search.archivo || "").toLowerCase();
+    const summary = (search.coincidencias?.join(", ") || "").toLowerCase();
     const term = searchTerm.toLowerCase();
 
     const matchesSearch =
       id.includes(term) || fileName.includes(term) || summary.includes(term);
 
-    const isSuccess = search.status !== "error";
+    const isSuccess = (search.coincidencias?.length || 0) > 0;
+    console.log(isSuccess)
 
     const matchesFilter =
       filterStatus === "all" ||
@@ -69,16 +70,15 @@ const SearchHistory = () => {
     const {
       _id,
       createdAt,
-      originalFilename,
-      responseSummary,
-      responseData,
-      status,
+      archivo,
+      patron,
+      coincidencias,
     } = search;
 
-    const success = status !== "error";
-    const matches = responseData?.matches ?? 0;
-    const suspects = responseData?.suspects ?? [];
-    const pattern = responseData?.pattern || "N/A";
+    const success = (coincidencias?.length || 0) > 0;    
+    const matches = coincidencias?.length || 0;
+    const suspects = coincidencias || [];
+    const pattern = patron || "N/A";
 
     return (
       <div className="modal-overlay" onClick={onClose}>
@@ -99,7 +99,7 @@ const SearchHistory = () => {
               <strong>Fecha:</strong> {new Date(createdAt).toLocaleString()}
             </p>
             <p>
-              <strong>Archivo:</strong> {originalFilename}
+              <strong>Archivo:</strong> {archivo}
             </p>
             <p>
               <strong>Patrón buscado:</strong> <code>{pattern}</code>
@@ -120,9 +120,9 @@ const SearchHistory = () => {
               <p className="no-suspects">No se encontraron sospechosos</p>
             )}
 
-            {responseSummary && (
+            {coincidencias && (
               <p style={{ marginTop: "1rem" }}>
-                <strong>Resumen:</strong> {responseSummary}
+                <strong>Resumen:</strong> {coincidencias}
               </p>
             )}
           </div>
@@ -206,7 +206,7 @@ const SearchHistory = () => {
             <>
               {filteredSearches.length > 0 ? (
                 filteredSearches.map((search) => {
-                  const isSuccess = search.status !== "error";
+                  const isSuccess = (search.coincidencias?.length || 0) > 0;
                   return (
                     <div key={search._id} className="history-item">
                       <div className="history-item-content">
@@ -215,7 +215,7 @@ const SearchHistory = () => {
                           <span className="history-item-id">{search._id}</span>
                           <span className="history-item-separator">|</span>
                           <span className="history-item-file">
-                            {search.originalFilename}
+                            {search.archivo}
                           </span>
                           <span className="history-item-separator">|</span>
                           <span className="history-item-date">
