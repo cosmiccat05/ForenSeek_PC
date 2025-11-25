@@ -44,7 +44,6 @@ const SearchHistory = () => {
       id.includes(term) || fileName.includes(term) || summary.includes(term);
 
     const isSuccess = (search.coincidencias?.length || 0) > 0;
-    console.log(isSuccess)
 
     const matchesFilter =
       filterStatus === "all" ||
