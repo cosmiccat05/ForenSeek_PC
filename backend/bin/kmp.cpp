@@ -10,7 +10,7 @@ using std::string;
 using std::string_view;
 using std::vector;
 
-// ----------------- Modelo -----------------
+//Modelo
 struct Suspect {
     string name;
     string dna;
@@ -26,7 +26,6 @@ void from_json(const json& j, Suspect& s) {
     j.at("dna").get_to(s.dna);
 }
 
-// ----------------- KMP helpers -----------------
 static vector<int> buildLps(string_view pat) {
     vector<int> lps(pat.size(), 0);
     int len = 0;
@@ -62,8 +61,7 @@ static bool kmpContains(string_view txt, string_view pat, const vector<int>& lps
     return false;
 }
 
-// ----------------- Helpers CSV -----------------
-
+//Helpers CSV
 static string trim(const string& s) {
     size_t start = s.find_first_not_of(" \t\r\n");
     if (start == string::npos) return "";
@@ -71,36 +69,30 @@ static string trim(const string& s) {
     return s.substr(start, end - start + 1);
 }
 
-// Carga un CSV simple con formato: name,dna
+//Carga un CSV simple con formato: name,dna
 static bool loadSuspectsFromCsv(const string& path, vector<Suspect>& suspects, string& error) {
     std::ifstream file(path);
     if (!file.is_open()) {
         error = "No se pudo abrir el archivo CSV: " + path;
         return false;
     }
-
     string line;
     while (std::getline(file, line)) {
         line = trim(line);
         if (line.empty()) continue;
-
         size_t commaPos = line.find(',');
         if (commaPos == string::npos) {
             error = "Línea CSV sin coma: " + line;
             return false;
         }
-
         string name = trim(line.substr(0, commaPos));
         string dna  = trim(line.substr(commaPos + 1));
-
         if (name.empty() || dna.empty()) {
             error = "Línea CSV con nombre o dna vacío: " + line;
             return false;
         }
-
         suspects.push_back({name, dna});
     }
-
     if (suspects.empty()) {
         error = "El CSV no contiene registros válidos";
         return false;
@@ -109,31 +101,25 @@ static bool loadSuspectsFromCsv(const string& path, vector<Suspect>& suspects, s
     return true;
 }
 
-// ----------------- main -----------------
-
 int main() {
     json output;
-
     try {
-        // 1) Leer desde stdin: primera línea = ruta CSV, segunda = patrón
+        //Leer desde stdin: primera línea = ruta CSV, segunda = patrón
         string csvPath;
         string pattern;
-
         if (!std::getline(std::cin, csvPath) || csvPath.empty()) {
             output["status"]  = "error";
             output["message"] = "No se recibió la ruta del CSV por stdin";
             std::cout << output.dump() << std::endl;
             return 1;
         }
-
         if (!std::getline(std::cin, pattern)) {
             output["status"]  = "error";
             output["message"] = "No se recibió el patrón por stdin";
             std::cout << output.dump() << std::endl;
             return 1;
         }
-
-        // 2) Cargar CSV
+        //Cargar CSV
         vector<Suspect> suspects;
         string errorMsg;
         if (!loadSuspectsFromCsv(csvPath, suspects, errorMsg)) {
@@ -142,12 +128,10 @@ int main() {
             std::cout << output.dump() << std::endl;
             return 1;
         }
-
-        // 3) Preparar KMP
+        //Preparar KMP
         string_view pat_view(pattern);
         vector<int> lps = buildLps(pat_view);
-
-        // 4) Filtrar sospechosos que contienen el patrón
+        //Filtrar sospechosos que contienen el patrón
         json coincidencias = json::array();
         for (const auto& s : suspects) {
             string_view dna_view(s.dna);
@@ -156,16 +140,10 @@ int main() {
                 coincidencias.push_back(s.name);
             }
         }
-
-        // 5) Construir salida JSON
-        /*output["status"]        = "ok";
-        output["pattern"]       = pattern;
-        output["count"]         = coincidencias.size();*/
+        //Construir salida JSON
         output["coincidencias"] = coincidencias;
-
         std::cout << output.dump() << std::endl;
         return 0;
-
     } catch (const std::exception& e) {
         output["status"]  = "error";
         output["message"] = e.what();
