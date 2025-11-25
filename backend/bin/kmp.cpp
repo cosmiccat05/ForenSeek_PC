@@ -16,7 +16,7 @@ struct Suspect {
     string dna;
 };
 
-// JSON <-> struct (por si en algún momento quieres usarlo)
+// JSON <-> struct
 void to_json(json& j, const Suspect& s) {
     j = json{{"name", s.name}, {"dna", s.dna}};
 }
