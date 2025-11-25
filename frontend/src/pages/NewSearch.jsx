@@ -106,32 +106,14 @@ const NewSearch = () => {
     setResults(null); //limpiar resultados previos
   };
 
-  /*const handleSearch = () => {
-    setIsSearching(true);
-
-    setTimeout(() => {
-      const isSuccess = pattern.length > 10;
-
-      setResults({
-        success: isSuccess,
-        matches: isSuccess ? 5 : 0,
-        suspects: isSuccess
-          ? [
-              "Sospechoso 01",
-              "Sospechoso 02",
-              "Sospechoso 03",
-              "Sospechoso 04",
-              "Sospechoso 05",
-            ]
-          : [],
-      });
-
-      setIsSearching(false);
-      setStep("results");
-    }, 1500);
-  };*/
   const handleSearch = async () => {
     if (!pattern || !job) return;
+
+    if (pattern.length < 5) {
+      alert("El patrón debe tener al menos 5 caracteres");
+      return;
+    }
+
     setIsSearching(true);
 
     try {
@@ -371,7 +353,7 @@ const NewSearch = () => {
                 {results.suspects.length > 0 ? (
                   <ul className="suspects-list">
                     {results.suspects.map((suspect, index) => (
-                      <li key={index}>{`{${suspect}}`}</li>
+                      <li key={index}>{suspect}</li>
                     ))}
                   </ul>
                 ) : (

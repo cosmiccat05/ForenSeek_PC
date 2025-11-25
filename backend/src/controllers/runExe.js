@@ -7,10 +7,8 @@ const __dirname = path.dirname(__filename);
 
 export function runExe(archivo, patron) {
   return new Promise((resolve, reject) => {
-    // Ruta absoluta al .exe dentro de /bin
     const exePath = path.resolve(__dirname, "../../bin/kmp.exe");
 
-    // Crear proceso
     const child = spawn(exePath, [], {
       windowsHide: true
     });

@@ -36,7 +36,7 @@ const SearchHistory = () => {
   //filtrar búsquedas
   const filteredSearches = searches.filter((search) => {
     const id = (search._id || "").toLowerCase();
-    const fileName = (search.archivo || "").toLowerCase();
+    const fileName = (search.nombreOriginal || "").toLowerCase();
     const summary = (search.coincidencias?.join(", ") || "").toLowerCase();
     const term = searchTerm.toLowerCase();
 
@@ -69,7 +69,7 @@ const SearchHistory = () => {
     const {
       _id,
       createdAt,
-      archivo,
+      nombreOriginal,
       patron,
       coincidencias,
     } = search;
@@ -98,7 +98,7 @@ const SearchHistory = () => {
               <strong>Fecha:</strong> {new Date(createdAt).toLocaleString()}
             </p>
             <p>
-              <strong>Archivo:</strong> {archivo}
+              <strong>Archivo:</strong> {nombreOriginal}
             </p>
             <p>
               <strong>Patrón buscado:</strong> <code>{pattern}</code>
@@ -214,7 +214,7 @@ const SearchHistory = () => {
                           <span className="history-item-id">{search._id}</span>
                           <span className="history-item-separator">|</span>
                           <span className="history-item-file">
-                            {search.archivo}
+                            {search.nombreOriginal}
                           </span>
                           <span className="history-item-separator">|</span>
                           <span className="history-item-date">

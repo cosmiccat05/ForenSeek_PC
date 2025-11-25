@@ -11,13 +11,17 @@ const searchSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    nombreOriginal: {
+      type: String,
+      required: true,
+    },
     patron: {
       type: String,
       required: true,
       trim: true
     },
     coincidencias: {
-      type: [String],  // lista de sospechosos coincidentes
+      type: [String],
       default: []
     }
   },

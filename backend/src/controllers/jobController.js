@@ -58,6 +58,15 @@ export async function createJob(req, res) {
           preview: rows.slice(0, 5),
         };
 
+        // VALIDACIÓN: Debe tener mínimo 2 columnas
+        if (columnCount != 2) {
+          fs.unlink(path, () => {});
+          
+          return res.status(400).json({
+            message: "El archivo CSV debe tener 2 columnas",
+          });
+        }
+
         const job = await Job.create({
           user: userId,
           originalFilename: originalname,

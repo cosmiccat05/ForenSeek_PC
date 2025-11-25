@@ -61,7 +61,7 @@ const Home = () => {
       </section>
 
       {/* Estadísticas */}
-      <section className="dashboard-stats">
+      {/*<section className="dashboard-stats">
         <div className="stat-card">
           <div className="stat-number">00</div>
           <div className="stat-label">Total de búsquedas realizadas</div>
@@ -71,7 +71,7 @@ const Home = () => {
           <div className="stat-number">00</div>
           <div className="stat-label">Coincidencias detectadas este mes</div>
         </div>
-      </section>
+      </section>*/}
 
       <Footer />
     </div>
