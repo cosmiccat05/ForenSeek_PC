@@ -1,7 +1,7 @@
 {
   "name": "forenseek_pc",
   "version": "1.0.0",
-  "description": "Trabajo Final del curso de Programación Competitiva :p",
+  "description": "Trabajo Final del curso de Programación Competitiva",
   "main": "index.js",
   "scripts": {
     "build": "npm install --prefix backend && npm instal --prefix frontend && npm run build --prefix frontend",

@@ -25,10 +25,10 @@ const AuthPage = () => {
         <h2 className="auth-welcome">Bienvenid@</h2>
         
         <p className="auth-description">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi rutrum venenatis 
-          pellentesque. Cras accumsan, ex sed rutrum iaculis, augue odio iaculis lorem, a 
-          luctus erat tortor id dui. Suspendisse rutrum consectetur dolor, quis pharetra 
-          augue rutrum non. Cras eu condimentum tellus.
+          En Forenseek ponemos la tecnología al servicio de la investigación, 
+          ofreciéndote una plataforma intuitiva y confiable para comparar perfiles genéticos. 
+          Nuestro objetivo es que cada búsqueda sea clara, rápida y precisa, ayudándote a 
+          encontrar coincidencias que marquen la diferencia en tus casos.
         </p>
       </div>
 
