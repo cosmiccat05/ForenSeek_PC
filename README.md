@@ -1,13 +1,11 @@
 # ForenSeek_PC 🔎🐾
 
-ForenSeek_PC es el trabajo final del curso de Programación Competitiva.
-
 ## 📝 Descripción
 
 ForenSeek_PC es una plataforma orientada a búsquedas forenses de información, con una arquitectura separada entre cliente y servidor para gestionar autenticación, registro de búsquedas e historial.
 El proyecto está dividido en dos partes:
 
-- **Frontend** 🎨: aplicación web construida con React + Vite.
+- **Frontend** 🎨: aplicación web construida con React.
 - **Backend** ⚙️: API construida con Node.js + Express y conexión a MongoDB.
 
 ## ✨ Características
